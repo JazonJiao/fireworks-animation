@@ -45,47 +45,25 @@ class Love extends PointBase {
   }
 }
 
-function rnd(a, b) { return Math.random() * (b - a) + a; }
-
-let G = 0.03;
-
-
-class Star {
-  constructor(ctx, x, y) {
-    this.s = ctx;
-    this.x = x;
-    this.y = y;
-    this.vx = 0;
-    this.vy = rnd(-19, -9);
-    this.ax = 0;
-    this.ay = 0;
-
-  }
-
-  update() {
-    this.ay += G;
-    this.vx += this.ax;
-    this.vy += this.ay;
-    this.x += this.vx;
-    this.y += this.vy;
-  }
-
-  show() {
-    this.s.stroke(255, 255, 255);
-    this.s.strokeWeight(3);
-    this.s.point(this.x, this.y);
-  }
-}
+function rnd(a, b) { return Math.ceil(Math.random() * (b - a) + a); }
 
 
 class Particle {
-  constructor(ctx, x, y) {
+  constructor(ctx, x, y, c, explode) {
     this.s = ctx;
     this.x = x;
     this.y = y;
-    this.timer = new Timer2(100);  //
-    this.vx = rnd(-10, 10);
-    this.vy = rnd(-10, 10);
+    this.c = c;
+    this.g = 0.02;
+    this.expl = explode;
+    if (!this.expl) {
+      this.vx = 0;
+      this.vy = rnd(-19, -12);
+    } else {
+      this.timer = new Timer2(47);
+      this.vx = rnd(-10, 10);
+      this.vy = rnd(-10, 10);
+    }
     this.ax = 0;
     this.ay = 0;
 
@@ -93,22 +71,34 @@ class Particle {
 
   update() {
     this.ax += 0;
-    this.ay += G;
+    this.ay += this.g;
     this.vx += this.ax;
     this.vy += this.ay;
-    this.vx *= 0.95;
-    this.vy *= 0.95;
+    if (this.expl) {
+      this.vx *= 0.97;
+      this.vy *= 0.97;
+    }
     this.x += this.vx;
     this.y += this.vy;
   }
 
   show() {
-    let t = this.timer.advance();
-    if (t > 0) {
+    if (!this.expl) {
       this.update();
-      this.s.stroke(255 * (1 - t));
-      this.s.strokeWeight(3);
+      this.s.stroke(this.c);
+      this.s.strokeWeight(7);
       this.s.point(this.x, this.y);
+      return true;
+    } else {
+      let t = this.timer.advance();
+      if (t > 0) {
+        this.update();
+        this.s.stroke(this.c[0], this.c[1], this.c[2], 255 * (1 - t));
+        this.s.strokeWeight(4);
+        this.s.point(this.x, this.y);
+        return true;
+      }
+      return false;
     }
   }
 }
@@ -117,7 +107,9 @@ class Particle {
 class Firework {
   constructor(ctx) {
     this.s = ctx;
-    this.fw = new Star(this.s, rnd(100, 600), ctx.height);
+    this.n_particles = rnd(59, 99);
+    this.c = [rnd(9, 255), rnd(9, 255), rnd(9, 255)];
+    this.fw = new Particle(this.s, rnd(100, ctx.width - 100), ctx.height, this.c, false);
     this.ps = [];
     this.exploded = false;
   }
@@ -127,11 +119,11 @@ class Firework {
       this.fw.show();
       if (this.fw.vy >= 0) {  // reaches the top
         this.exploded = true;
-        for (let i = 0; i < 49; i++)
-          this.ps.push(new Particle(this.s, this.fw.x, this.fw.y));
+        for (let i = 0; i < this.n_particles; i++)
+          this.ps.push(new Particle(this.s, this.fw.x, this.fw.y, this.c, true));
       }
     } else {
-      for (let p of this.ps) p.show();
+      for (let p of this.ps) p.show()
     }
   }
 }
@@ -139,8 +131,11 @@ class Firework {
 
 const Graph01 = function(s) {
   let t = {
-    love: frames(1),
-    txt: frames(6),
+    msg: frames(1.5),
+    m_end: frames(9),
+    love: frames(12),
+    txt: frames(16),
+    fw: frames(20)
   };
   let tnr;
   s.preload = function() {
@@ -148,6 +143,8 @@ const Graph01 = function(s) {
   };
   s.setup = function () {
     setup2D(s);
+    s.background(0);
+
     s.love = new Love(s, {
       start: t.love, x: 579, y: 199, scale: 9
     });
@@ -158,22 +155,32 @@ const Graph01 = function(s) {
       str: "Happy Valentine’s Day to Jessie!", x: 349, y: 437, font: tnr, start: t.txt
     });
     s.txt[1] = new TextWriteIn(s, {
-      str: "——Jazon Jiao", x: 761, y: 499, font: tnr, start: t.txt + 49
+      str: "——Jazon Jiao", x: 761, y: 509, font: tnr, start: t.txt + 49
     });
     s.txt[2] = new TextWriteIn(s, {
-      str: "2022.02.14", x: 829, y: 547, font: tnr, start: t.txt + 69, size: 19
+      str: "2022.02.14", x: 819, y: 559, font: tnr, start: t.txt + 69, size: 24
     });
+    s.txt[3] = new TextFade(s, {
+      str: "In the 1st month since we met:", x: 350, y: 180, font: tnr, start: t.msg, end: t.m_end
+    });
+    s.txt[4] = new TextFade(s, {
+      str: "we sent 4000 messages to each other", x: 306, y: 259, font: tnr, start: t.msg + 50, end: t.m_end + 10
+    });
+    s.txt[5] = new TextFade(s, {
+      str: "Looking forward to more to come :-)", x: 309, y: 338, font: tnr, start: t.msg + 140, end: t.m_end + 20
+    });
+
     s.d = new Dragger(s, [s.txt, s.love]);
   };
   s.draw = function () {
-    s.background(0);
-    if (Math.random() < 0.1)
+    s.background(0, 99);  // add alpha to background to beautify firework
+    if (s.frameCount > t.fw && s.frameCount % 29 === 0)
       s.fw.push(new Firework(s));
     for (let f of s.fw) f.show();
 
     for (let x of s.txt) x.show();
     s.love.show();
-    s.d.show();
+    // s.d.show();
   };
 
 };
