@@ -66,7 +66,6 @@ class Particle {
     }
     this.ax = 0;
     this.ay = 0;
-
   }
 
   update() {
@@ -88,7 +87,6 @@ class Particle {
       this.s.stroke(this.c);
       this.s.strokeWeight(7);
       this.s.point(this.x, this.y);
-      return true;
     } else {
       let t = this.timer.advance();
       if (t > 0) {
@@ -96,9 +94,7 @@ class Particle {
         this.s.stroke(this.c[0], this.c[1], this.c[2], 255 * (1 - t));
         this.s.strokeWeight(4);
         this.s.point(this.x, this.y);
-        return true;
       }
-      return false;
     }
   }
 }
