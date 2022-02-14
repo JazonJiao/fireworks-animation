@@ -160,13 +160,13 @@ const Graph01 = function(s) {
       str: "In the 1st month since we met:", x: 350, y: 180, font: tnr, start: t.msg, end: t.m_end
     });
     s.txt[4] = new TextFade(s, {
-      str: "we sent 4296 messages to each other*", x: 306, y: 259, font: tnr, start: t.msg + 60, end: t.m_end + 10
+      str: "we sent 4339 messages to each other*", x: 306, y: 259, font: tnr, start: t.msg + 60, end: t.m_end + 10
     });
     s.txt[5] = new TextFade(s, {
       str: "Looking forward to more to come :-)", x: 309, y: 339, font: tnr, start: t.msg + 140, end: t.m_end + 20
     });
     s.txt[6] = new TextFade(s, {
-      str: "* (From 1/14 to 2/13, including 3601 on WeChat, 205 on ins, 490 on iMessage)",
+      str: "* (From 1/14 to 2/13, including 3644 on WeChat, 205 on ins, 490 on iMessage)",
       x: 314, y: 499, color: [99, 99, 99], font: tnr, start: t.msg + 240, end: t.m_end + 35, size: 17
     });
 
